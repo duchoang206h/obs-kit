@@ -1,0 +1,20 @@
+{
+  "env": {
+    "OTEL_SERVICE_NAME": "orders",
+    "OTEL_SERVICE_VERSION": "1.2.3",
+    "ENVIRONMENT": "test",
+    "OTEL_EXPORTER_OTLP_ENDPOINT": "http://collector:4318",
+    "OTEL_TRACES_SAMPLER_ARG": "0.5",
+    "OTEL_METRICS_EXPORT_INTERVAL": "30000",
+    "LOG_LEVEL": "debug"
+  },
+  "expected": {
+    "serviceName": "orders",
+    "serviceVersion": "1.2.3",
+    "environment": "test",
+    "collectorUrl": "http://collector:4318",
+    "tracingSampleRate": 0.5,
+    "metricsExportInterval": 30000,
+    "loggingLevel": "debug"
+  }
+}

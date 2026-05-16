@@ -1,0 +1,62 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+  file_log:
+    include:
+      - /var/log/obs-kit/*.log
+    start_at: beginning
+    operators:
+      - type: json_parser
+        parse_from: body
+        parse_to: attributes
+      - type: move
+        from: attributes.message
+        to: body
+      - type: move
+        from: attributes.level
+        to: attributes.severity_text
+
+processors:
+  batch:
+  transform/logs:
+    log_statements:
+      - context: log
+        statements:
+          - set(resource.attributes["service.name"], log.attributes["service.name"]) where log.attributes["service.name"] != nil
+          - set(resource.attributes["service.version"], log.attributes["service.version"]) where log.attributes["service.version"] != nil
+          - set(resource.attributes["deployment.environment"], log.attributes["deployment.environment"]) where log.attributes["deployment.environment"] != nil
+  resource:
+    attributes:
+      - key: collector.name
+        value: obs-kit-local-otel-collector
+        action: upsert
+
+exporters:
+  otlp_http/loki:
+    endpoint: http://loki:3100/otlp
+  otlp_grpc/tempo:
+    endpoint: tempo:4317
+    tls:
+      insecure: true
+  prometheus:
+    endpoint: 0.0.0.0:8889
+
+service:
+  pipelines:
+    logs:
+      receivers: [otlp, file_log]
+      processors: [transform/logs, resource, batch]
+      exporters: [otlp_http/loki]
+    traces:
+      receivers: [otlp]
+      processors: [resource, batch]
+      exporters: [otlp_grpc/tempo]
+    metrics:
+      receivers: [otlp]
+      processors: [resource, batch]
+      exporters: [prometheus]

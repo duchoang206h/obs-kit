@@ -1,0 +1,56 @@
+# Dependencies
+.venv/
+
+# Build output
+build/
+
+# Test coverage
+coverage/
+.coverage
+htmlcov/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+!logs/
+!logs/.gitkeep
+*.log
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+
+# Package lock files (optional - uncomment if using yarn)
+# package-lock.json
+
+# Python cache
+__pycache__/
+*.py[cod]
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# Go artifacts
+*.test
+*.out
+
+# NPM pack output
+*.tgz
+
+.npmrc

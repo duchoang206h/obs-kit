@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/duchoang206h/obs-kit/contracts/config.schema.json",
+  "title": "Obs Kit Config",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "serviceName": { "type": "string", "minLength": 1 },
+    "serviceVersion": { "type": "string" },
+    "environment": { "type": "string" },
+    "collector": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "url": { "type": "string" }
+      }
+    },
+    "tracing": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "sampleRate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "ignorePaths": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "exportInterval": { "type": "integer", "minimum": 1000 }
+      }
+    },
+    "logging": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "level": { "type": "string" }
+      }
+    }
+  },
+  "required": []
+}
