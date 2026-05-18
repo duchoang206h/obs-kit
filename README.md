@@ -31,12 +31,12 @@ make test
 
 The SDKs are intentionally implemented separately. Share contracts and examples, not runtime-specific implementation code.
 
-## Local Observability Stack
+## Grafana Stack
 
 Start the local Collector, Loki, Tempo, Prometheus, and Grafana stack:
 
 ```bash
-make observability-up
+make grafana-stack-up
 ```
 
 Run an example, then open Grafana at `http://localhost:3001`.
@@ -49,17 +49,43 @@ make example-python-fastapi
 make example-go-echo
 ```
 
-Use Loki for logs, Tempo for traces, and Prometheus for metrics. New services can use the SDK lifecycle APIs to export traces and metrics over OTLP to the collector at `http://localhost:4318`.
+Use Loki for logs, Tempo for traces, and Prometheus for metrics. New services can use the SDK lifecycle APIs to export traces and metrics over OTLP to the collector at `http://localhost:4318`. Both SDKs include manual DB and Redis operation helpers for client spans plus duration metrics; Python also exposes optional OpenTelemetry auto-instrumentation hooks for FastAPI, Flask, requests, SQLAlchemy, psycopg, asyncpg, Redis, and httpx.
 
 By default, SDK loggers write JSON to stdout/stderr. The examples use `logs/*.log` only so the local collector can tail files during development.
 
 Stop the stack with:
 
 ```bash
-docker compose -f deployments/local/docker-compose.yml down
+docker compose -f deployments/grafana-stack/docker-compose.yml down
 ```
 
-### Local Stack Components
+## SigNoz Deployment
+
+Start a SigNoz-backed local stack when you prefer one UI for logs, traces, and metrics:
+
+```bash
+make signoz-up
+```
+
+The repo compose file at `deployments/signoz/docker-compose.yml` contains SigNoz, ClickHouse, ZooKeeper, and the SigNoz OpenTelemetry Collector. The bridge collector for local file-log examples lives in `deployments/signoz/bridge.docker-compose.yml` and is started by `make signoz-up`.
+
+SigNoz is available at `http://localhost:8080`. Its collector listens on `localhost:4317` and `localhost:4318`. The optional obs-kit bridge collector listens on `localhost:14317` and `localhost:14318`, tails `logs/*.log`, and forwards logs, traces, and metrics to SigNoz. Use the bridge endpoint for local examples:
+
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:14318
+```
+
+Pin specific SigNoz image versions with:
+
+```bash
+make signoz-up SIGNOZ_VERSION=v0.124.0 SIGNOZ_OTELCOL_VERSION=v0.144.4
+```
+
+This deployment is for local development. For any shared environment, set a real `SIGNOZ_TOKENIZER_JWT_SECRET`.
+
+See `deployments/signoz/README.md` for details.
+
+### Grafana Stack Components
 
 The local Docker Compose stack is intended for development and contract testing:
 
@@ -82,7 +108,7 @@ apps/examples
   -> Grafana for exploration
 ```
 
-The collector configuration is in `deployments/local/otel-collector/config.yaml`. It receives OTLP logs, traces, and metrics; tails local example log files from `logs/*.log`; forwards logs to Loki with OTLP/HTTP; forwards traces to Tempo with OTLP/gRPC; and exposes metrics on `otel-collector:8889` for Prometheus to scrape.
+The collector configuration is in `deployments/grafana-stack/otel-collector/config.yaml`. It receives OTLP logs, traces, and metrics; tails local example log files from `logs/*.log`; forwards logs to Loki with OTLP/HTTP; forwards traces to Tempo with OTLP/gRPC; and exposes metrics on `otel-collector:8889` for Prometheus to scrape.
 
 ### Grafana Explore
 

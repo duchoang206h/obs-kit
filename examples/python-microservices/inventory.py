@@ -20,7 +20,6 @@ port = int(os.getenv("INVENTORY_PORT", "8092"))
 observability = init_observability(
     Config(service_name=SERVICE_NAME, service_version=SERVICE_VERSION, environment=ENVIRONMENT)
 )
-tracer = observability.tracer(SERVICE_NAME)
 
 log_path = Path(__file__).resolve().parents[2] / "logs" / f"{SERVICE_NAME}.log"
 logger = configure_logging(observability.config, log_file=log_path, logger_name=SERVICE_NAME)
@@ -42,7 +41,7 @@ def reserve_inventory(payload: dict[str, str]) -> dict[str, object]:
     order_id = payload["order_id"]
     sku = payload["sku"]
 
-    with tracer.start_as_current_span("inventory.reserve-stock") as span:
+    with observability.start_span("inventory.reserve-stock") as span:
         span.set_attribute("order.id", order_id)
         span.set_attribute("inventory.sku", sku)
         logger.info("stock reserved", extra={"order.id": order_id, "inventory.sku": sku})

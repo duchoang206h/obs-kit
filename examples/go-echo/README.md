@@ -3,7 +3,7 @@
 Run with the local observability stack:
 
 ```bash
-make observability-up
+make grafana-stack-up
 make example-go-echo
 ```
 

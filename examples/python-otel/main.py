@@ -10,7 +10,7 @@ def main() -> None:
     log_path = Path(__file__).resolve().parents[2] / "logs" / "python-otel.log"
     logger = configure_logging(observability.config, log_file=log_path, logger_name="python-otel")
 
-    with observability.tracer("python-otel").start_as_current_span("create-order"):
+    with observability.start_span("create-order"):
         logger.info("order created", extra={"order.id": "ord_otel_python"})
 
     observability.shutdown()

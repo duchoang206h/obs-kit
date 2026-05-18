@@ -10,7 +10,7 @@ go vet ./...
 gofmt -w .
 ```
 
-The package provides contract-aligned configuration, structured JSON logging, OpenTelemetry OTLP trace/metric export, and `net/http` middleware.
+The package provides contract-aligned configuration, structured JSON logging, OpenTelemetry OTLP trace/metric export, metric helpers, client operation helpers, and `net/http` middleware.
 
 ## OpenTelemetry
 
@@ -44,3 +44,32 @@ handler := observability.HTTPMiddleware(&obs.Config, mux)
 ```
 
 Use `observability.Float64(0)` when a service should intentionally disable trace sampling. The HTTP middleware extracts incoming W3C trace context and preserves optional `http.ResponseWriter` interfaces such as `http.Flusher`, `http.Hijacker`, and `http.Pusher` when the underlying writer supports them.
+
+Manual DB or Redis timing works with any client library:
+
+```go
+err = observability.TraceDBOperation(
+	ctx,
+	obs.Tracer("orders-api"),
+	obs.Meter("orders-api"),
+	observability.ClientOperation{
+		System:    "postgresql",
+		Operation: "SELECT",
+		Namespace: "orders",
+	},
+	func(ctx context.Context) error {
+		return db.QueryRowContext(ctx, "SELECT id FROM orders WHERE id = $1", orderID).Scan(&id)
+	},
+)
+
+err = observability.TraceRedisOperation(
+	ctx,
+	obs.Tracer("orders-api"),
+	obs.Meter("orders-api"),
+	"GET",
+	"0",
+	func(ctx context.Context) error {
+		return redis.Get(ctx, cacheKey).Err()
+	},
+)
+```

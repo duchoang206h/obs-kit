@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+from collections.abc import Mapping, MutableMapping
+from contextlib import AbstractContextManager
 from dataclasses import dataclass
+from typing import Any
 
-from opentelemetry import metrics, trace
+from opentelemetry import metrics, propagate, trace
 from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.metrics import MeterProvider
@@ -19,6 +22,8 @@ from opentelemetry.sdk.trace.sampling import ParentBased, TraceIdRatioBased
 
 from obs_kit.config import Config, resolve_config
 
+SpanContextManager = AbstractContextManager[trace.Span]
+
 
 @dataclass(frozen=True)
 class Observability:
@@ -31,6 +36,36 @@ class Observability:
 
     def meter(self, name: str) -> metrics.Meter:
         return metrics.get_meter(name)
+
+    def start_span(
+        self,
+        name: str,
+        *,
+        tracer_name: str | None = None,
+        attributes: Mapping[str, Any] | None = None,
+    ) -> SpanContextManager:
+        tracer = self.tracer(tracer_name or self.config.service_name or "unknown-service")
+        return tracer.start_as_current_span(
+            name,
+            attributes=dict(attributes or {}),
+        )
+
+    def start_client_span(
+        self,
+        name: str,
+        *,
+        tracer_name: str | None = None,
+        attributes: Mapping[str, Any] | None = None,
+    ) -> SpanContextManager:
+        tracer = self.tracer(tracer_name or self.config.service_name or "unknown-service")
+        return tracer.start_as_current_span(
+            name,
+            kind=trace.SpanKind.CLIENT,
+            attributes=dict(attributes or {}),
+        )
+
+    def inject_headers(self, headers: MutableMapping[str, str]) -> None:
+        propagate.inject(headers)
 
     def shutdown(self) -> None:
         if self.tracer_provider is not None:

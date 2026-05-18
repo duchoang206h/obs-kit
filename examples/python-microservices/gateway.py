@@ -5,12 +5,11 @@ import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
+from urllib.error import HTTPError, URLError
 from urllib import request
 
 import uvicorn
-from fastapi import FastAPI, Response, status
-from opentelemetry import propagate
-from opentelemetry.trace import SpanKind
+from fastapi import FastAPI, HTTPException, Response, status
 
 from obs_kit import Config, configure_logging, init_observability
 from obs_kit.auto import instrument_python
@@ -25,7 +24,6 @@ port = int(os.getenv("GATEWAY_PORT", "8091"))
 observability = init_observability(
     Config(service_name=SERVICE_NAME, service_version=SERVICE_VERSION, environment=ENVIRONMENT)
 )
-tracer = observability.tracer(SERVICE_NAME)
 
 log_path = Path(__file__).resolve().parents[2] / "logs" / f"{SERVICE_NAME}.log"
 logger = configure_logging(observability.config, log_file=log_path, logger_name=SERVICE_NAME)
@@ -46,18 +44,17 @@ instrument_python(fastapi_app=app)
 def create_order(response: Response) -> dict[str, object]:
     order_id = "ord_micro_python"
 
-    with tracer.start_as_current_span("gateway.validate-order") as span:
+    with observability.start_span("gateway.validate-order") as span:
         span.set_attribute("order.id", order_id)
         logger.info("order validated", extra={"order.id": order_id})
 
-    with tracer.start_as_current_span(
+    with observability.start_client_span(
         "gateway.call-inventory",
-        kind=SpanKind.CLIENT,
         attributes={"http.method": "POST", "peer.service": "python-micro-inventory"},
     ) as span:
         payload = json.dumps({"order_id": order_id, "sku": "sku_observability"}).encode()
         headers = {"content-type": "application/json"}
-        propagate.inject(headers)
+        observability.inject_headers(headers)
 
         inventory_request = request.Request(
             f"{inventory_url}/reserve",
@@ -65,8 +62,30 @@ def create_order(response: Response) -> dict[str, object]:
             headers=headers,
             method="POST",
         )
-        with request.urlopen(inventory_request, timeout=5) as inventory_response:
-            inventory_payload = json.loads(inventory_response.read().decode())
+        try:
+            with request.urlopen(inventory_request, timeout=5) as inventory_response:
+                inventory_payload = json.loads(inventory_response.read().decode())
+        except HTTPError as exc:
+            span.record_exception(exc)
+            span.set_attribute("http.response.status_code", exc.code)
+            logger.error(
+                "inventory request failed",
+                extra={"order.id": order_id, "http.response.status_code": exc.code},
+            )
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail="inventory service returned an error",
+            ) from exc
+        except URLError as exc:
+            span.record_exception(exc)
+            logger.error(
+                "inventory service unavailable",
+                extra={"order.id": order_id, "inventory.url": inventory_url},
+            )
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="inventory service is unavailable",
+            ) from exc
 
         span.set_attribute("http.response.status_code", inventory_response.status)
         span.set_attribute("inventory.reserved", bool(inventory_payload["reserved"]))

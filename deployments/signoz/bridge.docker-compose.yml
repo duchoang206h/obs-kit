@@ -1,0 +1,14 @@
+services:
+  obs-kit-signoz-collector:
+    image: otel/opentelemetry-collector-contrib:0.151.0
+    command: ["--config=/etc/otelcol/config.yaml"]
+    environment:
+      SIGNOZ_OTLP_GRPC_ENDPOINT: ${SIGNOZ_OTLP_GRPC_ENDPOINT:-host.docker.internal:4317}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./otel-collector/config.yaml:/etc/otelcol/config.yaml:ro
+      - ../../logs:/var/log/obs-kit:ro
+    ports:
+      - "14317:14317"
+      - "14318:14318"

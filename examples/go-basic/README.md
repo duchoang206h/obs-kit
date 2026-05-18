@@ -6,4 +6,4 @@ Run from this directory:
 go run .
 ```
 
-The example writes JSON logs to `../../logs/go-basic.log`. Start the local stack with `make observability-up`, then search the logs in Grafana Explore.
+The example writes JSON logs to `../../logs/go-basic.log`. Start the Grafana stack with `make grafana-stack-up`, then search the logs in Grafana Explore.

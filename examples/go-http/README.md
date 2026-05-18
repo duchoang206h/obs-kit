@@ -1,9 +1,9 @@
 # Go HTTP Middleware Example
 
-Run with the local stack:
+Run with the Grafana stack:
 
 ```bash
-make observability-up
+make grafana-stack-up
 make example-go-http
 ```
 

@@ -1,0 +1,58 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:14317
+      http:
+        endpoint: 0.0.0.0:14318
+
+  file_log:
+    include:
+      - /var/log/obs-kit/*.log
+    start_at: beginning
+    operators:
+      - type: json_parser
+        parse_from: body
+        parse_to: attributes
+      - type: move
+        from: attributes.message
+        to: body
+      - type: move
+        from: attributes.level
+        to: attributes.severity_text
+
+processors:
+  batch:
+  transform/logs:
+    log_statements:
+      - context: log
+        statements:
+          - set(resource.attributes["service.name"], log.attributes["service.name"]) where log.attributes["service.name"] != nil
+          - set(resource.attributes["service.version"], log.attributes["service.version"]) where log.attributes["service.version"] != nil
+          - set(resource.attributes["deployment.environment"], log.attributes["deployment.environment"]) where log.attributes["deployment.environment"] != nil
+  resource:
+    attributes:
+      - key: collector.name
+        value: obs-kit-signoz-bridge
+        action: upsert
+
+exporters:
+  otlp/signoz:
+    endpoint: ${env:SIGNOZ_OTLP_GRPC_ENDPOINT}
+    tls:
+      insecure: true
+
+service:
+  pipelines:
+    logs:
+      receivers: [otlp, file_log]
+      processors: [transform/logs, resource, batch]
+      exporters: [otlp/signoz]
+    traces:
+      receivers: [otlp]
+      processors: [resource, batch]
+      exporters: [otlp/signoz]
+    metrics:
+      receivers: [otlp]
+      processors: [resource, batch]
+      exporters: [otlp/signoz]

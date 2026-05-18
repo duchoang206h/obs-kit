@@ -1,8 +1,10 @@
-.PHONY: test test-python test-go lint-python lint-go fmt-go example-python example-python-otel example-python-fastapi example-python-microservices-gateway example-python-microservices-inventory example-go example-go-http example-go-echo observability-up observability-down observability-logs
+.PHONY: test test-python test-go lint-python lint-go fmt-go example-python example-python-otel example-python-fastapi example-python-microservices-gateway example-python-microservices-inventory example-go example-go-http example-go-echo grafana-stack-up grafana-stack-down grafana-stack-logs observability-up observability-down observability-logs signoz-up signoz-down signoz-logs signoz-bridge-up signoz-bridge-down signoz-bridge-logs
 
 GO_CACHE := /private/tmp/obs-kit-go-cache
 PYTHON_ENV := /private/tmp/obs-kit-python-venv
 UV_CACHE := /private/tmp/obs-kit-uv-cache
+SIGNOZ_VERSION ?= v0.124.0
+SIGNOZ_OTELCOL_VERSION ?= v0.144.4
 
 test: test-python test-go
 
@@ -49,13 +51,40 @@ example-go-echo:
 	mkdir -p $(GO_CACHE)
 	cd examples/go-echo && GOCACHE=$(GO_CACHE) go run .
 
-observability-up:
+grafana-stack-up:
 	mkdir -p logs
 	touch logs/python-micro-gateway.log logs/python-micro-inventory.log
-	docker compose -f deployments/local/docker-compose.yml up -d
+	docker compose -f deployments/grafana-stack/docker-compose.yml up -d
 
-observability-down:
-	docker compose -f deployments/local/docker-compose.yml down
+grafana-stack-down:
+	docker compose -f deployments/grafana-stack/docker-compose.yml down
 
-observability-logs:
-	docker compose -f deployments/local/docker-compose.yml logs -f
+grafana-stack-logs:
+	docker compose -f deployments/grafana-stack/docker-compose.yml logs -f
+
+observability-up: grafana-stack-up
+
+observability-down: grafana-stack-down
+
+observability-logs: grafana-stack-logs
+
+signoz-up:
+	SIGNOZ_VERSION="$(SIGNOZ_VERSION)" SIGNOZ_OTELCOL_VERSION="$(SIGNOZ_OTELCOL_VERSION)" docker compose -f deployments/signoz/docker-compose.yml up -d --remove-orphans
+	$(MAKE) signoz-bridge-up
+
+signoz-down:
+	$(MAKE) signoz-bridge-down
+	docker compose -f deployments/signoz/docker-compose.yml down
+
+signoz-logs:
+	docker compose -f deployments/signoz/docker-compose.yml logs -f
+
+signoz-bridge-up:
+	mkdir -p logs
+	docker compose -f deployments/signoz/bridge.docker-compose.yml up -d
+
+signoz-bridge-down:
+	docker compose -f deployments/signoz/bridge.docker-compose.yml down
+
+signoz-bridge-logs:
+	docker compose -f deployments/signoz/bridge.docker-compose.yml logs -f
