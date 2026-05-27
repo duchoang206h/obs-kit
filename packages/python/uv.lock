@@ -163,6 +163,98 @@ wheels = [
 ]
 
 [[package]]
+name = "duchoang-obs-kit"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "opentelemetry-api" },
+    { name = "opentelemetry-exporter-otlp" },
+    { name = "opentelemetry-sdk" },
+]
+
+[package.optional-dependencies]
+auto = [
+    { name = "opentelemetry-instrumentation" },
+    { name = "opentelemetry-instrumentation-fastapi" },
+    { name = "opentelemetry-instrumentation-flask" },
+    { name = "opentelemetry-instrumentation-logging" },
+    { name = "opentelemetry-instrumentation-requests" },
+]
+celery = [
+    { name = "opentelemetry-instrumentation" },
+    { name = "opentelemetry-instrumentation-celery" },
+    { name = "opentelemetry-instrumentation-fastapi" },
+    { name = "opentelemetry-instrumentation-flask" },
+    { name = "opentelemetry-instrumentation-logging" },
+    { name = "opentelemetry-instrumentation-requests" },
+]
+db = [
+    { name = "opentelemetry-instrumentation" },
+    { name = "opentelemetry-instrumentation-asyncpg" },
+    { name = "opentelemetry-instrumentation-fastapi" },
+    { name = "opentelemetry-instrumentation-flask" },
+    { name = "opentelemetry-instrumentation-logging" },
+    { name = "opentelemetry-instrumentation-psycopg" },
+    { name = "opentelemetry-instrumentation-psycopg2" },
+    { name = "opentelemetry-instrumentation-requests" },
+    { name = "opentelemetry-instrumentation-sqlalchemy" },
+]
+httpx = [
+    { name = "opentelemetry-instrumentation" },
+    { name = "opentelemetry-instrumentation-fastapi" },
+    { name = "opentelemetry-instrumentation-flask" },
+    { name = "opentelemetry-instrumentation-httpx" },
+    { name = "opentelemetry-instrumentation-logging" },
+    { name = "opentelemetry-instrumentation-requests" },
+]
+redis = [
+    { name = "opentelemetry-instrumentation" },
+    { name = "opentelemetry-instrumentation-fastapi" },
+    { name = "opentelemetry-instrumentation-flask" },
+    { name = "opentelemetry-instrumentation-logging" },
+    { name = "opentelemetry-instrumentation-redis" },
+    { name = "opentelemetry-instrumentation-requests" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "mypy" },
+    { name = "pytest" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "duchoang-obs-kit", extras = ["auto"], marker = "extra == 'celery'" },
+    { name = "duchoang-obs-kit", extras = ["auto"], marker = "extra == 'db'" },
+    { name = "duchoang-obs-kit", extras = ["auto"], marker = "extra == 'httpx'" },
+    { name = "duchoang-obs-kit", extras = ["auto"], marker = "extra == 'redis'" },
+    { name = "opentelemetry-api", specifier = ">=1.38.0" },
+    { name = "opentelemetry-exporter-otlp", specifier = ">=1.38.0" },
+    { name = "opentelemetry-instrumentation", marker = "extra == 'auto'", specifier = ">=0.59b0" },
+    { name = "opentelemetry-instrumentation-asyncpg", marker = "extra == 'db'", specifier = ">=0.59b0" },
+    { name = "opentelemetry-instrumentation-celery", marker = "extra == 'celery'", specifier = ">=0.59b0" },
+    { name = "opentelemetry-instrumentation-fastapi", marker = "extra == 'auto'", specifier = ">=0.59b0" },
+    { name = "opentelemetry-instrumentation-flask", marker = "extra == 'auto'", specifier = ">=0.59b0" },
+    { name = "opentelemetry-instrumentation-httpx", marker = "extra == 'httpx'", specifier = ">=0.59b0" },
+    { name = "opentelemetry-instrumentation-logging", marker = "extra == 'auto'", specifier = ">=0.59b0" },
+    { name = "opentelemetry-instrumentation-psycopg", marker = "extra == 'db'", specifier = ">=0.59b0" },
+    { name = "opentelemetry-instrumentation-psycopg2", marker = "extra == 'db'", specifier = ">=0.59b0" },
+    { name = "opentelemetry-instrumentation-redis", marker = "extra == 'redis'", specifier = ">=0.59b0" },
+    { name = "opentelemetry-instrumentation-requests", marker = "extra == 'auto'", specifier = ">=0.59b0" },
+    { name = "opentelemetry-instrumentation-sqlalchemy", marker = "extra == 'db'", specifier = ">=0.59b0" },
+    { name = "opentelemetry-sdk", specifier = ">=1.38.0" },
+]
+provides-extras = ["auto", "celery", "db", "httpx", "redis"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "mypy", specifier = ">=1.10.0" },
+    { name = "pytest", specifier = ">=8.0.0" },
+    { name = "ruff", specifier = ">=0.5.0" },
+]
+
+[[package]]
 name = "googleapis-common-protos"
 version = "1.75.0"
 source = { registry = "https://pypi.org/simple" }
@@ -389,88 +481,6 @@ wheels = [
 ]
 
 [[package]]
-name = "obs-kit"
-version = "0.1.0"
-source = { editable = "." }
-dependencies = [
-    { name = "opentelemetry-api" },
-    { name = "opentelemetry-exporter-otlp" },
-    { name = "opentelemetry-sdk" },
-]
-
-[package.optional-dependencies]
-auto = [
-    { name = "opentelemetry-instrumentation" },
-    { name = "opentelemetry-instrumentation-fastapi" },
-    { name = "opentelemetry-instrumentation-flask" },
-    { name = "opentelemetry-instrumentation-logging" },
-    { name = "opentelemetry-instrumentation-requests" },
-]
-db = [
-    { name = "opentelemetry-instrumentation" },
-    { name = "opentelemetry-instrumentation-asyncpg" },
-    { name = "opentelemetry-instrumentation-fastapi" },
-    { name = "opentelemetry-instrumentation-flask" },
-    { name = "opentelemetry-instrumentation-logging" },
-    { name = "opentelemetry-instrumentation-psycopg" },
-    { name = "opentelemetry-instrumentation-psycopg2" },
-    { name = "opentelemetry-instrumentation-requests" },
-    { name = "opentelemetry-instrumentation-sqlalchemy" },
-]
-httpx = [
-    { name = "opentelemetry-instrumentation" },
-    { name = "opentelemetry-instrumentation-fastapi" },
-    { name = "opentelemetry-instrumentation-flask" },
-    { name = "opentelemetry-instrumentation-httpx" },
-    { name = "opentelemetry-instrumentation-logging" },
-    { name = "opentelemetry-instrumentation-requests" },
-]
-redis = [
-    { name = "opentelemetry-instrumentation" },
-    { name = "opentelemetry-instrumentation-fastapi" },
-    { name = "opentelemetry-instrumentation-flask" },
-    { name = "opentelemetry-instrumentation-logging" },
-    { name = "opentelemetry-instrumentation-redis" },
-    { name = "opentelemetry-instrumentation-requests" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "mypy" },
-    { name = "pytest" },
-    { name = "ruff" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "obs-kit", extras = ["auto"], marker = "extra == 'db'" },
-    { name = "obs-kit", extras = ["auto"], marker = "extra == 'httpx'" },
-    { name = "obs-kit", extras = ["auto"], marker = "extra == 'redis'" },
-    { name = "opentelemetry-api", specifier = ">=1.38.0" },
-    { name = "opentelemetry-exporter-otlp", specifier = ">=1.38.0" },
-    { name = "opentelemetry-instrumentation", marker = "extra == 'auto'", specifier = ">=0.59b0" },
-    { name = "opentelemetry-instrumentation-asyncpg", marker = "extra == 'db'", specifier = ">=0.59b0" },
-    { name = "opentelemetry-instrumentation-fastapi", marker = "extra == 'auto'", specifier = ">=0.59b0" },
-    { name = "opentelemetry-instrumentation-flask", marker = "extra == 'auto'", specifier = ">=0.59b0" },
-    { name = "opentelemetry-instrumentation-httpx", marker = "extra == 'httpx'", specifier = ">=0.59b0" },
-    { name = "opentelemetry-instrumentation-logging", marker = "extra == 'auto'", specifier = ">=0.59b0" },
-    { name = "opentelemetry-instrumentation-psycopg", marker = "extra == 'db'", specifier = ">=0.59b0" },
-    { name = "opentelemetry-instrumentation-psycopg2", marker = "extra == 'db'", specifier = ">=0.59b0" },
-    { name = "opentelemetry-instrumentation-redis", marker = "extra == 'redis'", specifier = ">=0.59b0" },
-    { name = "opentelemetry-instrumentation-requests", marker = "extra == 'auto'", specifier = ">=0.59b0" },
-    { name = "opentelemetry-instrumentation-sqlalchemy", marker = "extra == 'db'", specifier = ">=0.59b0" },
-    { name = "opentelemetry-sdk", specifier = ">=1.38.0" },
-]
-provides-extras = ["auto", "db", "httpx", "redis"]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "mypy", specifier = ">=1.10.0" },
-    { name = "pytest", specifier = ">=8.0.0" },
-    { name = "ruff", specifier = ">=0.5.0" },
-]
-
-[[package]]
 name = "opentelemetry-api"
 version = "1.41.1"
 source = { registry = "https://pypi.org/simple" }
@@ -587,6 +597,20 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/0c/a5/13be4f6412abdeb3b18c95871e993b58e2a21b1e7a7a385692ba04f16e66/opentelemetry_instrumentation_asyncpg-0.62b1.tar.gz", hash = "sha256:6bd7fdcd8116ff400abe12503d43b89c076ded9df1db0638050351504d59b907", size = 8800, upload-time = "2026-04-24T13:22:41.807Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/3c/f0/07cbce732e49f925be75c98f51cfa380694d85304c41bd3a8fbfd9954ccf/opentelemetry_instrumentation_asyncpg-0.62b1-py3-none-any.whl", hash = "sha256:d58a3b2da6d41faba3e47613b0dfe739e639af5a7c74c2715e06730a0f57f81e", size = 10089, upload-time = "2026-04-24T13:21:41.092Z" },
+]
+
+[[package]]
+name = "opentelemetry-instrumentation-celery"
+version = "0.62b1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "opentelemetry-api" },
+    { name = "opentelemetry-instrumentation" },
+    { name = "opentelemetry-semantic-conventions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/35/86/9e78c174b2f6ea92af3f99aa7488807b74290a5cd44a8e05bfbfd7b109be/opentelemetry_instrumentation_celery-0.62b1.tar.gz", hash = "sha256:f0035abd464a2989414a9c5ecdd79a25c87bd8c43f96c7f39e07000c6f25dfef", size = 14809, upload-time = "2026-04-24T13:22:45.656Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/24/51/f38a31ac8f8e3bd365f301f697661679addaf548d52a05cfdde4448a5493/opentelemetry_instrumentation_celery-0.62b1-py3-none-any.whl", hash = "sha256:50567a47b7adc4ea552d09709de4d73fea7b4ff24ab0e9d38739d03fcd3f95ef", size = 13864, upload-time = "2026-04-24T13:21:46.557Z" },
 ]
 
 [[package]]

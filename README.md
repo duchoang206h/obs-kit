@@ -49,7 +49,7 @@ make example-python-fastapi
 make example-go-echo
 ```
 
-Use Loki for logs, Tempo for traces, and Prometheus for metrics. New services can use the SDK lifecycle APIs to export traces and metrics over OTLP to the collector at `http://localhost:4318`. Both SDKs include manual DB and Redis operation helpers for client spans plus duration metrics; Python also exposes optional OpenTelemetry auto-instrumentation hooks for FastAPI, Flask, requests, SQLAlchemy, psycopg, asyncpg, Redis, and httpx.
+Use Loki for logs, Tempo for traces, and Prometheus for metrics. New services can use the SDK lifecycle APIs to export traces and metrics over OTLP to the collector at `http://localhost:4318`. Both SDKs include manual DB and Redis operation helpers for client spans plus duration metrics; Python also exposes optional OpenTelemetry auto-instrumentation hooks for FastAPI, Flask, requests, SQLAlchemy, psycopg, asyncpg, Redis, httpx, and Celery.
 
 By default, SDK loggers write JSON to stdout/stderr. The examples use `logs/*.log` only so the local collector can tail files during development.
 
@@ -135,7 +135,9 @@ Use the SDKs as normal dependencies from outside this repository. Pin a tag or c
 Python:
 
 ```bash
-pip install "obs-kit[auto] @ git+https://github.com/duchoang206h/obs-kit.git@<tag-or-commit>#subdirectory=packages/python"
+pip install "duchoang-obs-kit[auto] @ git+https://github.com/duchoang206h/obs-kit.git@<tag-or-commit>#subdirectory=packages/python"
+# For Celery workers:
+pip install "duchoang-obs-kit[celery] @ git+https://github.com/duchoang206h/obs-kit.git@<tag-or-commit>#subdirectory=packages/python"
 ```
 
 Go:
@@ -157,3 +159,27 @@ LOG_LEVEL=info
 ```
 
 The current SDK exporters use OTLP over HTTP. Set `OTEL_EXPORTER_OTLP_ENDPOINT` to the collector base URL; the SDKs export traces to `/v1/traces` and metrics to `/v1/metrics`.
+
+## Publishing Python Package
+
+The Python package is published from `packages/python` when a GitHub Release is published. The workflow lives at `.github/workflows/publish-python.yml` and uses PyPI Trusted Publishing.
+
+Before the first release:
+
+1. Create or claim the `duchoang-obs-kit` project on PyPI.
+2. In PyPI, add a trusted publisher for this repository:
+   - Owner: `duchoang206h`
+   - Repository: `obs-kit`
+   - Workflow: `publish-python.yml`
+   - Environment: `pypi`
+3. In GitHub, create an environment named `pypi`. Add required reviewers if you want manual approval before publishing.
+4. Update `packages/python/pyproject.toml` version before release.
+5. Create a GitHub Release whose name matches the Python package version, for example `0.1.0`.
+
+The workflow builds source and wheel distributions, stores them as a workflow artifact, then publishes them to PyPI using the release job's OIDC token.
+
+The PyPI distribution is named `duchoang-obs-kit`, but the Python import package stays `obs_kit`:
+
+```python
+import obs_kit
+```

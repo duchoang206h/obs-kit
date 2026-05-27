@@ -17,7 +17,7 @@ The package provides contract-aligned configuration, structured JSON logging, Op
 
 ## OpenTelemetry
 
-Use `init_observability()` to configure OTLP trace and metric export. Install `obs-kit[auto]` for optional FastAPI, Flask, requests, and logging auto-instrumentation helpers. Install `obs-kit[db]`, `obs-kit[redis]`, or `obs-kit[httpx]` when enabling those client integrations.
+Use `init_observability()` to configure OTLP trace and metric export. Install `duchoang-obs-kit[auto]` for optional FastAPI, Flask, requests, and logging auto-instrumentation helpers. Install `duchoang-obs-kit[db]`, `duchoang-obs-kit[redis]`, `duchoang-obs-kit[httpx]`, or `duchoang-obs-kit[celery]` when enabling those client integrations.
 
 The Python SDK exports telemetry to the configured collector with OTLP over HTTP:
 
@@ -57,6 +57,32 @@ instrument_python(
     enable_redis=True,
     enable_httpx=True,
 )
+```
+
+Celery workers should initialize tracing inside each prefork child process:
+
+```python
+from celery.signals import worker_process_init
+from obs_kit import Config, init_observability
+from obs_kit.auto import instrument_python
+
+
+@worker_process_init.connect(weak=False)
+def init_celery_observability(*_args, **_kwargs):
+    init_observability(
+        Config(
+            service_name="orders-worker",
+            service_version="1.4.2",
+            environment="production",
+        )
+    )
+    instrument_python(enable_celery=True)
+```
+
+Install the Celery extra for this hook:
+
+```bash
+pip install "duchoang-obs-kit[celery]"
 ```
 
 Manual DB or Redis timing works with any client library:
