@@ -14,6 +14,7 @@ def instrument_python(
     enable_psycopg: bool = False,
     enable_psycopg2: bool = False,
     enable_redis: bool = False,
+    enable_celery: bool = False,
 ) -> None:
     logging_module = _import_optional(
         "opentelemetry.instrumentation.logging",
@@ -81,6 +82,13 @@ def instrument_python(
             "Install obs-kit[httpx] to instrument httpx",
         )
         httpx_module.HTTPXClientInstrumentor().instrument()
+
+    if enable_celery:
+        celery_module = _import_optional(
+            "opentelemetry.instrumentation.celery",
+            "Install obs-kit[celery] to instrument Celery",
+        )
+        celery_module.CeleryInstrumentor().instrument()
 
 
 def _import_optional(module_name: str, message: str) -> Any:

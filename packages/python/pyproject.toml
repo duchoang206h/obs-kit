@@ -1,5 +1,5 @@
 [project]
-name = "obs-kit"
+name = "duchoang-obs-kit"
 version = "0.1.0"
 description = "Python observability SDK aligned with the obs-kit contracts"
 requires-python = ">=3.11"
@@ -17,19 +17,23 @@ auto = [
   "opentelemetry-instrumentation-requests>=0.59b0",
   "opentelemetry-instrumentation-logging>=0.59b0",
 ]
+celery = [
+  "duchoang-obs-kit[auto]",
+  "opentelemetry-instrumentation-celery>=0.59b0",
+]
 db = [
-  "obs-kit[auto]",
+  "duchoang-obs-kit[auto]",
   "opentelemetry-instrumentation-sqlalchemy>=0.59b0",
   "opentelemetry-instrumentation-asyncpg>=0.59b0",
   "opentelemetry-instrumentation-psycopg>=0.59b0",
   "opentelemetry-instrumentation-psycopg2>=0.59b0",
 ]
 httpx = [
-  "obs-kit[auto]",
+  "duchoang-obs-kit[auto]",
   "opentelemetry-instrumentation-httpx>=0.59b0",
 ]
 redis = [
-  "obs-kit[auto]",
+  "duchoang-obs-kit[auto]",
   "opentelemetry-instrumentation-redis>=0.59b0",
 ]
 
